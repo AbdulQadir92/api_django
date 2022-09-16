@@ -3,11 +3,12 @@ from django.http import JsonResponse
 from .models import *
 import json
 from django.views.decorators.csrf import csrf_exempt
+import datetime
 
 
 # Create your views here.
 def get_products(request):
-    query_set = Product.objects.all().values()
+    query_set = Product.objects.filter(updated_at=None, deleted_at=None).values()
     products = []
     for product in query_set:
         products.append(product)
@@ -20,7 +21,7 @@ def add_product(request):
         data = json.loads(request.body)
         title = data['title']
         price = data['price']
-        product_obj = Product.objects.create(title=title, price=price)
+        product_obj = Product.objects.create(title=title, price=price, created_by=1)
         product = {
             'id': product_obj.id,
             'title': product_obj.title,
@@ -49,10 +50,11 @@ def update_product(request, id):
         price = data['price']
 
         query_obj = Product.objects.get(id=id)
-        query_obj.title = title
-        query_obj.price = price
+        query_obj.updated_by = 1
+        query_obj.updated_at = datetime.datetime.now()
         query_obj.save()
 
+        product_obj = Product.objects.create(title=title, price=price, created_by=1)
         product = {
             "id": query_obj.id,
             "title": query_obj.title,
@@ -68,7 +70,9 @@ def update_product(request, id):
 def delete_product(request, id):
     if request.method == 'POST':
         query_obj = Product.objects.get(id=id)
-        query_obj.delete()
+        query_obj.deleted_by = 1
+        query_obj.deleted_at= datetime.datetime.now()
+        query_obj.save()
         return JsonResponse({"message": "product deleted"})
     else:
         return JsonResponse({"error": "Only post method is allowed"})
