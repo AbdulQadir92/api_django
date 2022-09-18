@@ -18,10 +18,12 @@ def get_products(request):
 @csrf_exempt
 def add_product(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        title = data['title']
-        price = data['price']
-        product_obj = Product.objects.create(title=title, price=price, created_by=1)
+
+        title = request.POST.get('title')
+        price = request.POST.get('price')
+        image = request.FILES.get('image')
+        
+        product_obj = Product.objects.create(title=title, price=price, image=image, created_by=1)
         product = {
             'id': product_obj.id,
             'title': product_obj.title,
@@ -37,7 +39,8 @@ def get_product(request, id):
     product = {
         "id": query_obj.id,
         "title": query_obj.title,
-        "price": query_obj.price
+        "price": query_obj.price,
+        "image": query_obj.image.url
     }
     return JsonResponse(product)
 
@@ -45,20 +48,26 @@ def get_product(request, id):
 @csrf_exempt
 def update_product(request, id):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        title = data['title']
-        price = data['price']
+        title = request.POST.get('title')
+        price = request.POST.get('price')
+        image = request.FILES.get('image')
 
         query_obj = Product.objects.get(id=id)
         query_obj.updated_by = 1
         query_obj.updated_at = datetime.datetime.now()
-        query_obj.save()
 
-        product_obj = Product.objects.create(title=title, price=price, created_by=1)
+        if image:
+            product_obj = Product.objects.create(title=title, price=price, image=image, created_by=1)
+        else:
+            product_obj = Product.objects.create(title=title, price=price, image=query_obj.image, created_by=1)
+
+        query_obj.save()    
+
         product = {
-            "id": query_obj.id,
-            "title": query_obj.title,
-            "price": query_obj.price
+            "id": product_obj.id,
+            "title": product_obj.title,
+            "price": product_obj.price,
+            "image": product_obj.image.url
         }
 
         return JsonResponse({"product": product, "message": "product updated"})
