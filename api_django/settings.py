@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-bo7c4sb4_+na*r@kou2n5z%ah&5_on1yjy1hdu4vs@da_z-fp0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'basic-api-react.netlify.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'basic-api-django.herokuapp.com']
 
 
 # Application definition
